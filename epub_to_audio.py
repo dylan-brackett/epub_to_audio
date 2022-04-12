@@ -106,8 +106,8 @@ if __name__ == '__main__':
     content_path = os.path.join(TEMP_DIR, get_root_file(TEMP_DIR))
     chapters = get_spine_content_chapters(content_path)
     print("Reading text...")
-    # text = get_epub_text(chapters)
-    text = get_chapter_text(chapters[2])
+    text = get_epub_text(chapters)
+    # text = get_chapter_text(chapters[2])
 
     # Create mp3
     engine = pyttsx3.init()
