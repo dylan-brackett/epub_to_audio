@@ -1,0 +1,5 @@
+venv/
+_epub_temp/
+.vscode/
+*.mp3
+*.epub
