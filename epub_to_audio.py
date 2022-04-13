@@ -10,6 +10,9 @@ import pyttsx3
 TEMP_DIR = '__epub_to_audio_tmp'
 
 def extract_epub(path_to_epub):
+    if not os.path.exists(path_to_epub):
+        print("Could not find epub file")
+        exit(1)
     with ZipFile(path_to_epub) as zip:
         zip.extractall(TEMP_DIR)
 
@@ -23,32 +26,19 @@ def get_xml_root(file_path):
     with open(file_path, 'r', encoding='utf-8') as f:
         return ET.fromstring(f.read())
 
-def get_root_file(epub_dir):
+def get_epub_root_file(epub_dir):
     container_path = os.path.join(epub_dir, 'META-INF', 'container.xml')
     root = get_xml_root(container_path)
     for item in root.iter():
         if ('rootfile' in item.tag) and (not 'rootfiles' in item.tag):
             return item.get('full-path')
 
-def get_spine_idrefs(spine):
-    content_idrefs = []
-    for item in list(spine):
-        content_idrefs.append(item.get('idref'))
-    return content_idrefs
-
-def get_spine(content_path):
-    root = get_xml_root(content_path)
-    for item in root.iter():
-        if 'spine' in item.tag:
-            return item
-
 def get_spine_content_chapters(content_path):
     chapters = []
-
-    spine = get_spine(content_path)
-    content_idrefs = get_spine_idrefs(spine)
-    
     root = get_xml_root(content_path)
+    spine = xml_tag_search(root, 'spine')
+    content_idrefs = [cont.get('idref') for cont in list(spine) if cont.get('idref')]
+    
     for id in content_idrefs:
         for item in root.iter():
             if item.get('id') == id:
@@ -103,7 +93,7 @@ if __name__ == '__main__':
     # Get the epub text
     extract_epub(path_to_epub)
     print("Extracting Epub...")
-    content_path = os.path.join(TEMP_DIR, get_root_file(TEMP_DIR))
+    content_path = os.path.join(TEMP_DIR, get_epub_root_file(TEMP_DIR))
     chapters = get_spine_content_chapters(content_path)
     print("Reading text...")
     text = get_epub_text(chapters)
